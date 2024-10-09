@@ -45,7 +45,7 @@ export function HomeCarousel() {
   useEffect(() => {
     const interval = setInterval(() => {
       setActiveIndex((prevIndex) => (prevIndex + 1) % items.length);
-    }, 3000); // Change every 3 seconds
+    }, 2000); // Change every 2 seconds
 
     return () => clearInterval(interval); // Clear interval on component unmount
   }, []);
@@ -82,14 +82,6 @@ export function HomeCarousel() {
           </CarouselItem>
         ))}
       </CarouselContent>
-      <CarouselPrevious
-        onClick={() =>
-          setActiveIndex((prev) => (prev - 1 + items.length) % items.length)
-        }
-      />
-      <CarouselNext
-        onClick={() => setActiveIndex((prev) => (prev + 1) % items.length)}
-      />
     </Carousel>
   );
 }
