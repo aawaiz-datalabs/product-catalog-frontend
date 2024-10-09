@@ -21,6 +21,7 @@ interface products {
 }
 
 import Container from "@/components/container";
+import Image from "next/image";
 
 async function getProducts(): Promise<products[]> {
   const result = await fetch("http://localhost:5500/products");
@@ -36,6 +37,7 @@ export default async function products() {
         <div className="grid grid-cols-3 gap-8">
           {products.map((product) => (
             <Card key={product.id}>
+              <Image src={product.image} alt="Wave" width={300} height={300} />
               <CardHeader>
                 <div>
                   <CardTitle>{product.title}</CardTitle>

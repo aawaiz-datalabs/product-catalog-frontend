@@ -4,6 +4,7 @@ import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
 import NavigationBar from "@/components/NavigationBar";
 import Container from "@/components/container";
+import Footer from "@/components/Footer";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -41,6 +42,7 @@ export default function RootLayout({
           >
             <NavigationBar />
             {children}
+            <Footer />
           </ThemeProvider>
         </Container>
       </body>

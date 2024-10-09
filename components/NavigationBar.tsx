@@ -16,10 +16,18 @@ const NavigationBar = () => {
       <div>
         <Link href="/">
           <Image
-            src="/images/logo/logo-70.png" // Path to your SVG file
+            src="/images/logo/logo-70.png"
             alt="Wave"
             width={50}
             height={50}
+            className="hidden dark:block"
+          />
+          <Image
+            src="/images/logo/Black logo-70.png"
+            alt="Wave"
+            width={50}
+            height={50}
+            className="dark:hidden"
           />
         </Link>
       </div>
@@ -41,7 +49,7 @@ const NavigationBar = () => {
               </Link>
             </NavigationMenuItem>
             <NavigationMenuItem>
-              <Link href="/#categories" legacyBehavior passHref>
+              <Link href="/#range" legacyBehavior passHref>
                 <NavigationMenuLink className={navigationMenuTriggerStyle()}>
                   Our Product Range
                 </NavigationMenuLink>
