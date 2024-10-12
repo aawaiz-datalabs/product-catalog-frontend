@@ -376,7 +376,7 @@ export default function LoginPage() {
     event.preventDefault();
     setIsLoading(true);
 
-    const { data, error } = await supabase.auth.signInWithPassword({
+    const { error } = await supabase.auth.signInWithPassword({
       email,
       password,
     });
@@ -452,7 +452,7 @@ export default function LoginPage() {
             </Button>
           </form>
           <p className="px-8 text-center text-sm text-muted-foreground">
-            Don't have an account?{" "}
+            Don&apos;t have an account?{" "}
             <Link href="/signup" className="text-sm underline">
               Sign up
             </Link>

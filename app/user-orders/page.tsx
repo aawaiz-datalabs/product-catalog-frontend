@@ -79,7 +79,7 @@ export default function UserOrders() {
     <div className="container mx-auto p-4">
       <h1 className="mb-6 text-2xl font-bold">My Orders</h1>
       {orders.length === 0 ? (
-        <p>You haven't placed any orders yet.</p>
+        <p>You haven&apos;t placed any orders yet.</p>
       ) : (
         <div className="grid gap-8">
           {orders.map((order) => (

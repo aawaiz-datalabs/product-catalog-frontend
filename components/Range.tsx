@@ -1,11 +1,4 @@
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import Image from "next/image";
 import { H1 } from "./typography/HeadingsTypography";
 
@@ -35,7 +28,7 @@ function Range() {
             className="hidden dark:block"
           />
           <CardHeader>
-            <CardTitle>Men's Clothing</CardTitle>
+            <CardTitle>Men&apos;s Clothing</CardTitle>
           </CardHeader>
         </Card>
         <Card
@@ -57,7 +50,7 @@ function Range() {
             className="hidden dark:block"
           />
           <CardHeader>
-            <CardTitle>Women's Clothing</CardTitle>
+            <CardTitle>Women&apos;s Clothing</CardTitle>
           </CardHeader>
         </Card>
         <Card

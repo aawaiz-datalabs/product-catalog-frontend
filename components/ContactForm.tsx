@@ -67,6 +67,7 @@ export default function Component() {
       });
       form.reset();
     } catch (error) {
+      console.log(error);
       toast({
         title: "Error",
         description:

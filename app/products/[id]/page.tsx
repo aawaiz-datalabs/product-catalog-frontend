@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import Container from "@/components/container";
 import { useAtom } from "jotai";
-import { cartAtom, CartItem } from "@/lib/atoms";
+import { cartAtom } from "@/lib/atoms";
 import { toast } from "@/hooks/use-toast";
 
 interface Product {

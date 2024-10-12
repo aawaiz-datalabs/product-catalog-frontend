@@ -1,30 +1,5 @@
 {
-  "users": [
-    {
-      "id": "8ca9",
-      "username": "Ava",
-      "email": "syed+143@datalabscorp.com",
-      "firstname": "Syyy",
-      "lastname": "Aaaa",
-      "number": "7788994455",
-      "city": "Hydrabad",
-      "state": "Telangana",
-      "country": "",
-      "password": null
-    },
-    {
-      "id": "6f92",
-      "username": "Awesome",
-      "email": "syed+1@datalabscorp.com",
-      "firstname": "Syed",
-      "lastname": "Aawaiz",
-      "number": "+91-7780112990",
-      "city": "Hydrabad",
-      "state": "Telangana",
-      "country": "India",
-      "password": null
-    }
-  ],
+  "users": [],
   "products": [
     {
       "id": "1",
@@ -268,27 +243,5 @@
     }
   ],
   "messages": [],
-  "orders": [
-    {
-      "id": "d3f3",
-      "items": [
-        {
-          "id": "2",
-          "title": "Mens Casual Premium Slim Fit T-Shirts ",
-          "price": 22.3,
-          "quantity": 1
-        },
-        {
-          "id": "13",
-          "title": "Acer SB220Q bi 21.5 inches Full HD (1920 x 1080) IPS Ultra-Thin",
-          "price": 599,
-          "quantity": 1
-        }
-      ],
-      "total": 621.3,
-      "date": "2024-10-11T23:29:53.129Z",
-      "userEmail": "syed+1@datalabscorp.com",
-      "status": "Placed"
-    }
-  ]
+  "orders": []
 }
