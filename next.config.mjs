@@ -1,5 +1,7 @@
 // next.config.mjs
 
+import { resolve } from "path";
+
 export const nextConfig = {
   images: {
     remotePatterns: [
@@ -10,6 +12,13 @@ export const nextConfig = {
         pathname: "/img/**", // Adjust this based on the image path pattern
       },
     ],
+  },
+  webpack: (config) => {
+    config.resolve.alias = {
+      ...config.resolve.alias,
+      jotai: resolve("node_modules/jotai"),
+    };
+    return config;
   },
 };
 

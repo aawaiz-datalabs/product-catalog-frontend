@@ -5,6 +5,7 @@ import { ThemeProvider } from "@/components/theme-provider";
 import NavigationBar from "@/components/NavigationBar";
 import Container from "@/components/container";
 import Footer from "@/components/Footer";
+import { UserProvider } from "@/components/UserContext"; // Adjust the path as necessary
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -33,18 +34,22 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <Container>
-          <ThemeProvider
-            attribute="class"
-            defaultTheme="system"
-            enableSystem
-            disableTransitionOnChange
-          >
-            <NavigationBar />
-            {children}
-            <Footer />
-          </ThemeProvider>
-        </Container>
+        <UserProvider>
+          <Container>
+            <ThemeProvider
+              attribute="class"
+              defaultTheme="system"
+              enableSystem
+              disableTransitionOnChange
+            >
+              <div className="flex min-h-screen flex-col">
+                <NavigationBar />
+                {children}
+                <Footer />
+              </div>
+            </ThemeProvider>
+          </Container>
+        </UserProvider>
       </body>
     </html>
   );

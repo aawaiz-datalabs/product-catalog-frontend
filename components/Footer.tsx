@@ -3,7 +3,7 @@ import { Facebook, Twitter, Instagram, Linkedin } from "lucide-react";
 
 export default function Footer() {
   return (
-    <footer className="mt-20">
+    <footer className="mt-auto">
       <div className="flex items-center justify-evenly border-t">
         <div className="flex gap-4 py-4">
           <h3 className="text-center text-lg font-semibold">Follow Us </h3>
