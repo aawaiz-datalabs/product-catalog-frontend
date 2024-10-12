@@ -2,7 +2,7 @@ import { H1, H2, P } from "@/components/typography/HeadingsTypography";
 
 function About() {
   return (
-    <div className="flex flex-col pt-20" id="about">
+    <div className="flex flex-col py-10" id="about">
       <div className="items-center justify-center text-center">
         <H1 H1="About Wave" />
       </div>

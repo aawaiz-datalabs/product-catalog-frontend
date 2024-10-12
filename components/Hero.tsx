@@ -3,7 +3,7 @@ import { H1, H2, P } from "@/components/typography/HeadingsTypography";
 
 function Hero() {
   return (
-    <div id="home" className="grid grid-cols-2 gap-20">
+    <div id="home" className="grid grid-cols-2 gap-20 pb-10">
       <div className="items-left flex flex-col justify-center gap-10">
         <H1 H1="Future Is With Wave" />
         <H2 H2="Innovation Meets Simplicity" />

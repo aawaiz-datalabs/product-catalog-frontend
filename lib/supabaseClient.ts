@@ -8,6 +8,3 @@ if (!supabaseUrl || !supabaseAnonKey) {
 }
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey)
-
-// Add this line to log the Supabase URL (remove in production)
-console.log('Supabase URL:', supabaseUrl)

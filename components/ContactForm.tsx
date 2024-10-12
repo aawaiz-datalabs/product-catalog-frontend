@@ -80,11 +80,11 @@ export default function Component() {
   }
 
   return (
-    <div id="contact" className="flex flex-col pt-20">
+    <div id="contact" className="flex flex-col py-10">
       <div className="items-center justify-center text-center">
         <H1 H1="Our Product Range" />
       </div>
-      <div className="pt-8">
+      <div className="pt-6">
         <Form {...form}>
           <form
             onSubmit={form.handleSubmit(onSubmit)}

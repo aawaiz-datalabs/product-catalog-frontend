@@ -12,6 +12,7 @@ interface User {
   city?: string;
   state?: string;
   country?: string;
+  userType?: string;
 }
 
 interface UserContextType {

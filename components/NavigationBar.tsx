@@ -15,6 +15,7 @@ import {
   Phone,
   MapPin,
   Package,
+  Settings,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/lib/supabaseClient";
@@ -44,15 +45,16 @@ interface User {
   id: string;
   username: string;
   email: string;
-  firstname?: string; // Make optional if not always available
-  lastname?: string; // Make optional if not always available
-  number?: string; // Make optional if not always available
-  city?: string; // Make optional if not always available
-  state?: string; // Make optional if not always available
-  country?: string; // Make optional if not always available
+  firstname?: string;
+  lastname?: string;
+  number?: string;
+  city?: string;
+  state?: string;
+  country?: string;
+  userType?: string;
 }
 
-const NavigationBar = () => {
+export default function NavigationBar() {
   const { user, setUser } = useUser();
   const router = useRouter();
   const [cart] = useAtom(cartAtom);
@@ -174,6 +176,17 @@ const NavigationBar = () => {
           <LogOut className="mr-2 h-4 w-4" />
           Sign out
         </Button>
+        {user.userType === "Admin" && (
+          <Button
+            onClick={() => router.push("/admin-panel")}
+            variant="outline"
+            size="sm"
+            className="mt-2 w-full"
+          >
+            <Settings className="mr-2 h-4 w-4" />
+            Admin Panel
+          </Button>
+        )}
       </>
     );
   };
@@ -200,7 +213,7 @@ const NavigationBar = () => {
       </div>
       <div>
         <NavigationMenu>
-          <NavigationMenuList>
+          <NavigationMenuList className="gap-6">
             <NavigationMenuItem>
               <Link href="/#home" legacyBehavior passHref>
                 <NavigationMenuLink>Home</NavigationMenuLink>
@@ -271,6 +284,4 @@ const NavigationBar = () => {
       </div>
     </div>
   );
-};
-
-export default NavigationBar;
+}

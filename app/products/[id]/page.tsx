@@ -70,7 +70,7 @@ export default function ProductPage({ params }: { params: { id: string } }) {
   }
 
   return (
-    <main className="py-12">
+    <main className="py-10">
       <Container>
         <Button onClick={() => router.back()} className="mb-6">
           Back to Products

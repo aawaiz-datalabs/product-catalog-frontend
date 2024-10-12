@@ -4,7 +4,7 @@ import { H1 } from "./typography/HeadingsTypography";
 
 function Range() {
   return (
-    <div id="range" className="flex flex-col pt-20">
+    <div id="range" className="flex flex-col py-10">
       <div className="items-center justify-center text-center">
         <H1 H1="Our Product Range" />
       </div>

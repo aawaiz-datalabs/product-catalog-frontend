@@ -66,7 +66,7 @@ export default function Products() {
       : products.filter((product) => product.category === selectedCategory);
 
   return (
-    <main className="py-12">
+    <main className="py-10">
       <Container>
         <div className="mb-8">
           <Select onValueChange={(value) => setSelectedCategory(value)}>
