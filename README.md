@@ -101,12 +101,6 @@ To set up the project locally, follow these steps:
    NEXT_PUBLIC_SUPABASE_ANON_KEY=
    ```
 
-````
-
-   ```bash
-   npm install
-````
-
 4. **Install dependencies**
    ```bash
    npm install
