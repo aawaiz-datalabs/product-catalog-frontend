@@ -82,7 +82,7 @@ export default function Component() {
   return (
     <div id="contact" className="flex flex-col py-10">
       <div className="items-center justify-center text-center">
-        <H1 H1="Our Product Range" />
+        <H1 H1="Contact Us" />
       </div>
       <div className="pt-6">
         <Form {...form}>
