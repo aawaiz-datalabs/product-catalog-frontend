@@ -1,4 +1,4 @@
-"use client"; // Add this line at the top
+"use client";
 
 import { useState, useEffect } from "react";
 import { useUser } from "@/components/UserContext";
@@ -21,12 +21,12 @@ interface SupabaseOrder {
   created_at: string;
   total_amount: number;
   status: string;
-  user_email: string;
+  user_id: string;
   order_items: {
     id: string;
     quantity: number;
     item_id: string;
-    products: Product; // Assuming `products` is of type Product
+    products: Product;
   }[];
 }
 
@@ -44,37 +44,49 @@ export default function UserOrders() {
       }
 
       try {
-        // Only provide the row type
-        const { data: ordersData, error: ordersError } =
-          await Supabase.from<SupabaseOrder>("orders") // Only provide row type
-            .select(
-              `id, created_at, total_amount, status, user_email, order_items (
-              id, quantity, item_id, products (id, title, price)
-            )`,
+        const { data: ordersData, error: ordersError } = await Supabase.from(
+          "orders",
+        )
+          .select(
+            `
+            id, 
+            created_at, 
+            total_amount, 
+            status, 
+            user_id, 
+            order_items (
+              id, 
+              quantity, 
+              item_id, 
+              products (id, title, price)
             )
-            .eq("user_email", user.email)
-            .order("created_at", { ascending: false });
+          `,
+          )
+          .eq("user_id", user.id)
+          .order("created_at", { ascending: false });
 
         if (ordersError) throw ordersError;
 
         if (ordersData) {
-          const formattedOrders = ordersData.map((order) => ({
-            id: order.id,
-            created_at: order.created_at,
-            total_amount: order.total_amount,
-            status: order.status,
-            user_email: order.user_email,
-            items: order.order_items.map((item) => ({
-              id: item.id,
-              quantity: item.quantity,
-              product: {
-                id: item.products.id,
-                title: item.products.title,
-                price: item.products.price,
-              },
-            })),
-          }));
-
+          const formattedOrders: SupabaseOrder[] = ordersData.map(
+            (order: any) => ({
+              id: order.id,
+              created_at: order.created_at,
+              total_amount: order.total_amount,
+              status: order.status,
+              user_id: order.user_id,
+              order_items: order.order_items.map((item: any) => ({
+                id: item.id,
+                quantity: item.quantity,
+                item_id: item.item_id,
+                products: {
+                  id: item.products.id,
+                  title: item.products.title,
+                  price: item.products.price,
+                },
+              })),
+            }),
+          );
           setOrders(formattedOrders);
         }
       } catch (err) {
@@ -138,11 +150,11 @@ export default function UserOrders() {
                   </span>
                 </div>
                 <OrderItemsList
-                  items={order.items.map((item) => ({
+                  items={order.order_items.map((item) => ({
                     id: item.id,
-                    title: item.product.title,
+                    title: item.products.title,
                     quantity: item.quantity,
-                    price: item.product.price,
+                    price: item.products.price,
                   }))}
                 />
               </CardContent>
