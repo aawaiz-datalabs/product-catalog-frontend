@@ -59,11 +59,18 @@ interface Product {
 
 interface Order {
   id: string;
-  items: Array<{ id: string; title: string; price: number; quantity: number }>;
+  items: OrderItem[];
   total_amount: number;
   created_at: string;
   user_email: string;
   status: string;
+}
+
+interface OrderItem {
+  id: string;
+  title: string;
+  price: number;
+  quantity: number;
 }
 
 interface Message {
@@ -94,20 +101,52 @@ export default function AdminDashboard() {
       try {
         const { data: users } = await Supabase.from("profiles").select("*");
         const { data: products } = await Supabase.from("products").select("*");
-        const { data: orders } =
-          await Supabase.from("orders").select("*, order_items(*)");
+        const { data: orders } = await Supabase.from("orders").select(
+          "*, order_items(*, products(id, title, price))",
+        );
         const { data: messages } = await Supabase.from("messages").select("*");
 
+        // Replace 'any' with more specific types in both locations
         setData({
           users: users || [],
           products: products || [],
           orders: orders
-            ? orders.map((order: any) => ({
-                ...order,
-                items: order.order_items,
-              }))
-            : [], // Ensure orders is not null before mapping
-          messages: messages || [], // Assuming you want to handle messages as well
+            ? orders.map(
+                (order: {
+                  id: string;
+                  total_amount: number;
+                  created_at: string;
+                  user_email: string;
+                  status: string;
+                  order_items: {
+                    product: {
+                      id: string;
+                      title: string;
+                      price: number;
+                    };
+                    quantity: number;
+                  }[];
+                }) => ({
+                  ...order,
+                  items: order.order_items.map(
+                    (item: {
+                      product: {
+                        id: string;
+                        title: string;
+                        price: number;
+                      };
+                      quantity: number;
+                    }) => ({
+                      id: item.product.id,
+                      title: item.product.title,
+                      price: item.product.price,
+                      quantity: item.quantity,
+                    }),
+                  ),
+                }),
+              )
+            : [],
+          messages: messages || [],
         });
       } catch (err) {
         console.error("Error fetching data:", err);

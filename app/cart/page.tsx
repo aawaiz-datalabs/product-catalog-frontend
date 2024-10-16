@@ -70,7 +70,7 @@ export default function CartPage() {
     }
 
     try {
-      const { data, error } = await Supabase.rpc("create_order", {
+      const { error } = await Supabase.rpc("create_order", {
         p_user_email: user.email,
         p_user_id: user.id,
         p_total_amount: total,
