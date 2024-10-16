@@ -8,7 +8,14 @@ import Container from "@/components/container";
 import { useAtom } from "jotai";
 import { cartAtom } from "@/lib/atoms";
 import { toast } from "@/hooks/use-toast";
+import { createClient } from "@supabase/supabase-js"; // Import Supabase client
 
+// Initialize Supabase client
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!; // Use your environment variable
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!; // Use your environment variable
+const supabase = createClient(supabaseUrl, supabaseAnonKey);
+
+// Define Product interface
 interface Product {
   id: number;
   title: string;
@@ -16,15 +23,27 @@ interface Product {
   description: string;
   category: string;
   image: string;
-  rating: {
-    rate: number;
-    count: number;
-  };
+  rating_rate: number; // Use the correct property name for the rating
+  rating_count: number; // Use the correct property name for the count
 }
 
-async function getProduct(id: string): Promise<Product> {
-  const result = await fetch(`http://localhost:5500/products/${id}`);
-  return result.json();
+async function getProduct(id: string): Promise<Product | null> {
+  const { data, error } = await supabase
+    .from("products") // Your Supabase table name
+    .select("*")
+    .eq("id", id)
+    .single();
+
+  if (error) {
+    console.error("Error fetching product:", error);
+    return null;
+  }
+
+  return {
+    ...data,
+    rating_rate: data.rating_rate || 0, // Ensure default values if needed
+    rating_count: data.rating_count || 0,
+  } as Product;
 }
 
 export default function ProductPage({ params }: { params: { id: string } }) {
@@ -94,8 +113,8 @@ export default function ProductPage({ params }: { params: { id: string } }) {
                 ₹{product.price.toFixed(2)}
               </p>
               <div className="mb-6 flex items-center">
-                <p className="mr-4 text-lg">Rating: {product.rating.rate}/5</p>
-                <p className="text-lg">({product.rating.count} reviews)</p>
+                <p className="mr-4 text-lg">Rating: {product.rating_rate}/5</p>
+                <p className="text-lg">({product.rating_count} reviews)</p>
               </div>
               <p className="mb-6 text-lg">{product.description}</p>
             </div>

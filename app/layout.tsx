@@ -1,11 +1,14 @@
-import type { Metadata } from "next";
+"use client";
+
+import { useEffect } from "react";
 import localFont from "next/font/local";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
 import NavigationBar from "@/components/NavigationBar";
 import Container from "@/components/container";
 import Footer from "@/components/Footer";
-import { UserProvider } from "@/components/UserContext"; // Adjust the path as necessary
+import { UserProvider } from "@/components/UserContext";
+import { useAuth } from "@/hooks/useAuth";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -19,16 +22,36 @@ const geistMono = localFont({
   weight: "100 900",
 });
 
-export const metadata: Metadata = {
-  title: "Wave",
-  description: "Live in style",
-};
-
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const { user, loading } = useAuth();
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const htmlElement = document.querySelector("html");
+      if (htmlElement) htmlElement.setAttribute("lang", "en");
+    }
+  }, []);
+
+  if (loading) {
+    return (
+      <html lang="en" suppressHydrationWarning>
+        <body
+          className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        >
+          <Container>
+            <div className="flex min-h-screen flex-col items-center justify-center">
+              <p>Loading...</p>
+            </div>
+          </Container>
+        </body>
+      </html>
+    );
+  }
+
   return (
     <html lang="en" suppressHydrationWarning>
       <body
