@@ -15,6 +15,14 @@ interface Product {
   price: number;
 }
 
+// Define OrderItem interface
+interface OrderItem {
+  id: string;
+  quantity: number;
+  item_id: string;
+  products: Product;
+}
+
 // Define the structure of the data returned by Supabase
 interface SupabaseOrder {
   id: string;
@@ -22,12 +30,22 @@ interface SupabaseOrder {
   total_amount: number;
   status: string;
   user_id: string;
-  order_items: {
+  order_items: OrderItem[];
+}
+
+// Define the structure of the raw data returned by Supabase
+interface RawSupabaseOrder {
+  id: string;
+  created_at: string;
+  total_amount: number;
+  status: string;
+  user_id: string;
+  order_items: Array<{
     id: string;
     quantity: number;
     item_id: string;
     products: Product;
-  }[];
+  }>;
 }
 
 export default function UserOrders() {
@@ -68,25 +86,21 @@ export default function UserOrders() {
         if (ordersError) throw ordersError;
 
         if (ordersData) {
-          const formattedOrders: SupabaseOrder[] = ordersData.map(
-            (order: any) => ({
-              id: order.id,
-              created_at: order.created_at,
-              total_amount: order.total_amount,
-              status: order.status,
-              user_id: order.user_id,
-              order_items: order.order_items.map((item: any) => ({
-                id: item.id,
-                quantity: item.quantity,
-                item_id: item.item_id,
-                products: {
-                  id: item.products.id,
-                  title: item.products.title,
-                  price: item.products.price,
-                },
-              })),
-            }),
-          );
+          const formattedOrders: SupabaseOrder[] = (
+            ordersData as unknown as RawSupabaseOrder[]
+          ).map((order) => ({
+            id: order.id,
+            created_at: order.created_at,
+            total_amount: order.total_amount,
+            status: order.status,
+            user_id: order.user_id,
+            order_items: order.order_items.map((item) => ({
+              id: item.id,
+              quantity: item.quantity,
+              item_id: item.item_id,
+              products: item.products,
+            })),
+          }));
           setOrders(formattedOrders);
         }
       } catch (err) {
