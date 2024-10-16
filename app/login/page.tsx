@@ -6,53 +6,34 @@ import { Icons } from "@/components/icons";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { supabase } from "@/lib/supabaseClient";
 import Link from "next/link";
-import { useUser } from "@/components/UserContext";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-
-interface User {
-  id: string;
-  email: string;
-  username: string;
-  usertype?: string;
-}
+import { supabase } from "@/lib/supabaseClient";
 
 export default function LoginPage() {
-  const { setUser } = useUser();
   const [isLoading, setIsLoading] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
 
-  async function onSubmit(event: React.SyntheticEvent) {
+  async function onSubmit(event: React.FormEvent) {
     event.preventDefault();
     setIsLoading(true);
     setError(null);
 
     try {
-      const { error: signInError } = await supabase.auth.signInWithPassword({
+      const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
 
-      if (signInError) throw signInError;
+      if (error) {
+        throw error;
+      }
 
-      const response = await fetch(`http://localhost:5500/users`);
-      if (!response.ok) throw new Error("Failed to fetch user data");
-
-      const users: User[] = await response.json();
-      const userData = users.find((user: User) => user.email === email);
-
-      if (!userData) throw new Error("User not found");
-
-      setUser(userData);
-      localStorage.setItem("user", JSON.stringify(userData));
-
-      if (userData.usertype === "Admin") {
-        router.push("/admin-dashboard");
-      } else {
+      if (data.user) {
+        console.log("User logged in:", data.user);
         router.push("/");
       }
     } catch (err) {

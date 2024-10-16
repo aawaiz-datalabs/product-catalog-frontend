@@ -1,26 +1,39 @@
-"use client";
+"use client"; // Add this line at the top
 
 import { useState, useEffect } from "react";
 import { useUser } from "@/components/UserContext";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Package } from "lucide-react";
 import OrderItemsList from "@/app/user-orders/OrderItemsList";
-import { Badge } from "@/components/ui/badge"; // Import the Badge component
+import { Badge } from "@/components/ui/badge";
+import { createClient } from "@supabase/supabase-js";
 
-interface OrderItem {
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+const supabase = createClient(supabaseUrl, supabaseAnonKey);
+
+// Define Product interface
+interface Product {
   id: string;
   title: string;
-  quantity: number;
   price: number;
 }
 
+// Define OrderItem interface
+interface OrderItem {
+  id: string;
+  quantity: number;
+  product: Product; // Reference to the Product
+}
+
+// Define Order interface
 interface Order {
   id: string;
-  date: string;
-  total: number;
+  created_at: string;
+  total_amount: number;
   status: string;
+  user_email: string;
   items: OrderItem[];
-  userEmail: string; // Add this field to associate orders with users
 }
 
 export default function UserOrders() {
@@ -37,17 +50,50 @@ export default function UserOrders() {
       }
 
       try {
-        const response = await fetch(`http://localhost:5500/orders`);
-        if (!response.ok) {
-          throw new Error("Failed to fetch orders");
-        }
-        const allOrders: Order[] = await response.json();
+        const { data: ordersData, error: ordersError } = await supabase
+          .from("orders")
+          .select(
+            `id,
+            created_at,
+            total_amount,
+            status,
+            user_email,
+            order_items (
+              id,
+              quantity,
+              item_id,
+              products (
+                id,
+                title,
+                price
+              )
+            )`,
+          )
+          .eq("user_email", user.email)
+          .order("created_at", { ascending: false });
 
-        // Filter orders to only include those associated with the logged-in user
-        const userOrders = allOrders.filter(
-          (order) => order.userEmail === user.email,
-        );
-        setOrders(userOrders);
+        if (ordersError) throw ordersError;
+
+        if (ordersData) {
+          const formattedOrders: Order[] = ordersData.map((order: any) => ({
+            id: order.id,
+            created_at: order.created_at,
+            total_amount: order.total_amount,
+            status: order.status,
+            user_email: order.user_email,
+            items: order.order_items.map((item: any) => ({
+              id: item.id,
+              quantity: item.quantity,
+              product: {
+                id: item.products.id,
+                title: item.products.title,
+                price: item.products.price,
+              },
+            })),
+          }));
+
+          setOrders(formattedOrders);
+        }
       } catch (err) {
         console.error("Error fetching orders:", err);
         setError("Failed to load orders. Please try again later.");
@@ -91,7 +137,7 @@ export default function UserOrders() {
                     Order #{order.id}
                   </span>
                   <span className="text-sm font-normal">
-                    {new Date(order.date).toLocaleDateString()}
+                    {new Date(order.created_at).toLocaleDateString()}
                   </span>
                 </CardTitle>
               </CardHeader>
@@ -104,11 +150,18 @@ export default function UserOrders() {
                   <span>
                     Total:{" "}
                     <span className="font-semibold">
-                      ${order.total.toFixed(2)}
+                      ${order.total_amount.toFixed(2)}
                     </span>
                   </span>
                 </div>
-                <OrderItemsList items={order.items || []} />
+                <OrderItemsList
+                  items={order.items.map((item) => ({
+                    id: item.id,
+                    title: item.product.title,
+                    quantity: item.quantity,
+                    price: item.product.price,
+                  }))}
+                />
               </CardContent>
             </Card>
           ))}

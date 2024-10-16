@@ -33,15 +33,29 @@ interface Product {
   description: string;
   category: string;
   image: string;
-  rating: {
-    rate: number;
-    count: number;
-  };
+  rating_rate: number;
+  rating_count: number;
 }
 
+// supabaseClient.js
+import { createClient } from "@supabase/supabase-js";
+
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+
+export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+
 async function getProducts(): Promise<Product[]> {
-  const result = await fetch("http://localhost:5500/products");
-  return result.json();
+  const { data, error } = await supabase
+    .from("products") // Change 'products' to your actual table name
+    .select("*"); // Use '*' to select all columns
+
+  if (error) {
+    console.error("Error fetching products:", error);
+    return []; // Return an empty array or handle the error as needed
+  }
+
+  return data; // Return the fetched products data
 }
 
 export default function Products() {
@@ -112,10 +126,10 @@ export default function Products() {
                       </p>
                       <div className="mb-4 flex items-center justify-between">
                         <p className="text-sm text-muted-foreground">
-                          Rating: {product.rating.rate}/5
+                          Rating: {product.rating_rate}/5
                         </p>
                         <p className="text-sm text-muted-foreground">
-                          ({product.rating.count} reviews)
+                          ({product.rating_count} reviews)
                         </p>
                       </div>
                       <Button

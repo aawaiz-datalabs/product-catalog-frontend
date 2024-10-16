@@ -18,7 +18,7 @@ import {
   Settings,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { supabase } from "@/lib/supabaseClient";
+import { Supabase } from "@/lib/supabaseClient"; // Ensure this exports your initialized supabase client
 import {
   NavigationMenu,
   NavigationMenuItem,
@@ -43,11 +43,11 @@ import {
 
 interface User {
   id: string;
-  username: string;
+  user_name: string;
   email: string;
-  firstname?: string;
-  lastname?: string;
-  number?: string;
+  first_name?: string;
+  last_name?: string;
+  phone_number?: string;
   city?: string;
   state?: string;
   country?: string;
@@ -67,30 +67,54 @@ export default function NavigationBar() {
       setIsLoading(true);
       setError(null);
       try {
+        // Fetch session first
         const {
-          data: { user: supabaseUser },
-        } = await supabase.auth.getUser();
-        const storedUser = localStorage.getItem("user");
+          data: { session },
+          error: sessionError,
+        } = await Supabase.auth.getSession();
 
-        if (supabaseUser) {
-          const email = supabaseUser.email;
-          if (typeof email === "string") {
-            const localUser = storedUser ? JSON.parse(storedUser) : null;
+        if (sessionError) {
+          console.error("Error fetching session:", sessionError);
+          return;
+        }
 
-            if (localUser && localUser.email === email) {
-              setUser(localUser);
+        if (session) {
+          const { user: supabaseUser } = session;
+
+          const { email } = supabaseUser;
+
+          if (email) {
+            const { data, error: fetchError } = await Supabase.from("profiles") // Ensure the table name is correct
+              .select("*")
+              .eq("email", email)
+              .single();
+
+            if (fetchError) throw fetchError;
+
+            if (data) {
+              const userData: User = {
+                id: data.id,
+                user_name: data.user_name,
+                email: data.email,
+                first_name: data.firstname,
+                last_name: data.lastname,
+                phone_number: data.number,
+                city: data.city,
+                state: data.state,
+                country: data.country,
+                userType: data.userType,
+              };
+              setUser(userData);
+              localStorage.setItem("user", JSON.stringify(userData));
             } else {
-              const fetchedUser = await fetchUserData(email);
-              if (fetchedUser) {
-                localStorage.setItem("user", JSON.stringify(fetchedUser));
-                setUser(fetchedUser);
-              } else {
-                throw new Error("User data not found");
-              }
+              throw new Error("User data not found");
             }
           }
-        } else if (storedUser) {
-          setUser(JSON.parse(storedUser));
+        } else {
+          const storedUser = localStorage.getItem("user");
+          if (storedUser) {
+            setUser(JSON.parse(storedUser));
+          }
         }
       } catch (err) {
         console.error("Error fetching user data:", err);
@@ -103,15 +127,8 @@ export default function NavigationBar() {
     checkUser();
   }, [setUser]);
 
-  const fetchUserData = async (email: string): Promise<User | null> => {
-    const response = await fetch("http://localhost:5500/users");
-    const users: User[] = await response.json();
-    const userData = users.find((user) => user.email === email);
-    return userData || null;
-  };
-
   const handleLogout = async () => {
-    await supabase.auth.signOut();
+    await Supabase.auth.signOut();
     localStorage.removeItem("user");
     setUser(null);
     router.push("/login");
@@ -135,9 +152,9 @@ export default function NavigationBar() {
         <div className="mb-4 flex items-center space-x-4">
           <User className="h-12 w-12 text-gray-400" />
           <div>
-            <p className="font-semibold">{user.username}</p>
+            <p className="font-semibold">{user.user_name}</p>
             <p className="text-sm text-gray-500">
-              {user.firstname} {user?.lastname}
+              {user.first_name} {user.last_name}
             </p>
           </div>
         </div>
@@ -146,10 +163,10 @@ export default function NavigationBar() {
             <Mail className="mr-2 h-4 w-4 text-gray-400" />
             <p className="text-sm">{user.email}</p>
           </div>
-          {user.number && (
+          {user.phone_number && (
             <div className="flex items-center">
               <Phone className="mr-2 h-4 w-4 text-gray-400" />
-              <p className="text-sm">{user.number}</p>
+              <p className="text-sm">{user.phone_number}</p>
             </div>
           )}
           {(user.city || user.state || user.country) && (
@@ -178,7 +195,7 @@ export default function NavigationBar() {
         </Button>
         {user.userType === "Admin" && (
           <Button
-            onClick={() => router.push("/admin-panel")}
+            onClick={() => router.push("/admin/admin-panel")}
             variant="outline"
             size="sm"
             className="mt-2 w-full"
@@ -244,24 +261,22 @@ export default function NavigationBar() {
       </div>
       <div className="flex items-center space-x-4">
         {user ? (
-          <>
-            <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
-              <PopoverTrigger asChild>
-                <Button variant="ghost" className="p-0">
-                  <span className="text-sm">Hey, {user.username}</span>
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-80">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>User Information</CardTitle>
-                    <CardDescription>Your account details</CardDescription>
-                  </CardHeader>
-                  <CardContent>{renderUserInfo()}</CardContent>
-                </Card>
-              </PopoverContent>
-            </Popover>
-          </>
+          <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
+            <PopoverTrigger asChild>
+              <Button variant="ghost" className="p-0">
+                <span className="text-sm">Hey, {user.user_name}</span>
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-80">
+              <Card>
+                <CardHeader>
+                  <CardTitle>User Information</CardTitle>
+                  <CardDescription>Your account details</CardDescription>
+                </CardHeader>
+                <CardContent>{renderUserInfo()}</CardContent>
+              </Card>
+            </PopoverContent>
+          </Popover>
         ) : (
           <>
             <Link href="/login">

@@ -2,8 +2,6 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { cn } from "@/lib/utils";
-import { Icons } from "@/components/icons";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -15,13 +13,8 @@ import {
   CardTitle,
   CardDescription,
 } from "@/components/ui/card";
-import { submitSignup, checkEmailExists } from "@/actions/signupSubmit";
-import { createClient } from "@supabase/supabase-js";
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-);
+import { Icons } from "@/components/icons"; // Assuming you have an Icons component
+import { submitSignup } from "@/actions/signupSubmit";
 
 type UserFormData = {
   email: string;
@@ -33,10 +26,9 @@ type UserFormData = {
   state: string;
   country: string;
   password: string;
-  userType: string;
 };
 
-export default function SignUpPage() {
+export default function SignupForm() {
   const [isLoading, setIsLoading] = useState(false);
   const [message, setMessage] = useState("");
   const [formData, setFormData] = useState<UserFormData>({
@@ -49,7 +41,6 @@ export default function SignUpPage() {
     state: "",
     country: "",
     password: "",
-    userType: "Consumer",
   });
 
   const router = useRouter();
@@ -58,153 +49,177 @@ export default function SignUpPage() {
     setFormData({ ...formData, [e.target.id]: e.target.value });
   };
 
-  async function onSubmit(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault();
+  const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
     setIsLoading(true);
     setMessage("");
 
     try {
-      // Check if email already exists in local database
-      const emailExists = await checkEmailExists(formData.email);
-      console.log("Email exists:", emailExists); // Debugging log
-      if (emailExists) {
-        setMessage(
-          "Error! This email is already registered. Please use a different email or log in.",
-        );
-        setIsLoading(false);
-        return;
-      }
+      const result = await submitSignup(formData);
 
-      // Supabase Authentication
-      const { data: authData, error: authError } = await supabase.auth.signUp({
-        email: formData.email,
-        password: formData.password,
-        options: {
-          data: {
-            username: formData.username,
-          },
-        },
-      });
-
-      if (authError) {
-        throw new Error(authError.message);
-      }
-
-      // Convert formData to FormData
-      const formDataToSubmit = new FormData();
-      Object.entries(formData).forEach(([key, value]) => {
-        formDataToSubmit.append(key, value);
-      });
-
-      // If Supabase signup is successful, proceed with local database submission
-      const response = await submitSignup(formDataToSubmit);
-      console.log("Signup response:", response); // Debugging log
-
-      if (response.success) {
-        setMessage(
-          "Signup successful! Please check your email for confirmation.",
-        );
+      if (result.success) {
+        setMessage(result.message);
         setTimeout(() => router.push("/login"), 2000);
       } else {
-        // If local database submission fails, delete the Supabase user
-        await supabase.auth.admin.deleteUser(authData.user!.id);
-        throw new Error(response.message);
+        setMessage(result.message);
       }
     } catch (error) {
-      console.error("Error during signup:", error);
-      if (error instanceof Error) {
-        setMessage(`Error: ${error.message}`);
-      } else {
-        setMessage("An unexpected error occurred. Please try again.");
-      }
+      setMessage(
+        `Error: ${error instanceof Error ? error.message : "Unknown error"}`,
+      );
     } finally {
       setIsLoading(false);
     }
-  }
+  };
 
   return (
     <div className="flex justify-center py-10">
       <Card className="w-full max-w-lg">
         <CardHeader className="text-center">
           <Icons.logo className="mx-auto h-10 w-10 text-primary" />
-          <CardTitle className="text-2xl font-semibold">
-            Create an account
-          </CardTitle>
-          <CardDescription>
-            Enter your details below to create your account.
-          </CardDescription>
+          <CardTitle>Create an Account</CardTitle>
+          <CardDescription>Fill in your details to sign up</CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={onSubmit} className="space-y-6">
-            <div className="space-y-4">
-              {Object.keys(formData).map(
-                (key) =>
-                  key !== "userType" && (
-                    <div key={key} className="space-y-2">
-                      <Label htmlFor={key}>
-                        {key.charAt(0).toUpperCase() + key.slice(1)}
-                      </Label>
-                      <Input
-                        id={key}
-                        name={key}
-                        type={
-                          key === "email"
-                            ? "email"
-                            : key === "password"
-                              ? "password"
-                              : "text"
-                        }
-                        placeholder={`Enter your ${key}`}
-                        value={formData[key as keyof UserFormData]}
-                        onChange={handleInputChange}
-                        disabled={isLoading}
-                        required
-                      />
-                    </div>
-                  ),
-              )}
+          <form onSubmit={onSubmit} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="email">Email</Label>
+              <Input
+                id="email"
+                type="email"
+                placeholder="Enter your email"
+                value={formData.email}
+                onChange={handleInputChange}
+                disabled={isLoading}
+                required
+              />
             </div>
-            <Button className="w-full" type="submit" disabled={isLoading}>
-              {isLoading && (
+            <div className="space-y-2">
+              <Label htmlFor="username">Username</Label>
+              <Input
+                id="username"
+                type="text"
+                placeholder="Enter your username"
+                value={formData.username}
+                onChange={handleInputChange}
+                disabled={isLoading}
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="firstname">First Name</Label>
+              <Input
+                id="firstname"
+                type="text"
+                placeholder="Enter your first name"
+                value={formData.firstname}
+                onChange={handleInputChange}
+                disabled={isLoading}
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="lastname">Last Name</Label>
+              <Input
+                id="lastname"
+                type="text"
+                placeholder="Enter your last name"
+                value={formData.lastname}
+                onChange={handleInputChange}
+                disabled={isLoading}
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="number">Phone Number</Label>
+              <Input
+                id="number"
+                type="tel"
+                placeholder="Enter your phone number"
+                value={formData.number}
+                onChange={handleInputChange}
+                disabled={isLoading}
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="city">City</Label>
+              <Input
+                id="city"
+                type="text"
+                placeholder="Enter your city"
+                value={formData.city}
+                onChange={handleInputChange}
+                disabled={isLoading}
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="state">State</Label>
+              <Input
+                id="state"
+                type="text"
+                placeholder="Enter your state"
+                value={formData.state}
+                onChange={handleInputChange}
+                disabled={isLoading}
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="country">Country</Label>
+              <Input
+                id="country"
+                type="text"
+                placeholder="Enter your country"
+                value={formData.country}
+                onChange={handleInputChange}
+                disabled={isLoading}
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="password">Password</Label>
+              <Input
+                id="password"
+                type="password"
+                placeholder="Enter your password"
+                value={formData.password}
+                onChange={handleInputChange}
+                disabled={isLoading}
+                required
+              />
+            </div>
+            <Button type="submit" disabled={isLoading} className="w-full">
+              {isLoading ? (
                 <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
+              ) : (
+                "Sign Up"
               )}
-              Sign Up
             </Button>
           </form>
           {message && (
             <p
-              className={cn(
-                "mt-4 text-sm",
-                message.startsWith("Error") ? "text-red-500" : "text-green-500",
-              )}
+              className={`mt-4 text-sm ${message.includes("success") ? "text-green-500" : "text-red-500"}`}
             >
               {message}
             </p>
           )}
         </CardContent>
-        <CardFooter className="flex flex-col space-y-2 text-center">
-          <p className="text-sm">
-            Already a user?{" "}
-            <a
-              href="/login"
-              className="underline underline-offset-4 hover:text-primary"
-            >
+        <CardFooter className="space-y-2 text-center">
+          <p>
+            Already have an account?{" "}
+            <a href="/login" className="underline">
               Login
             </a>
           </p>
-          <p className="text-sm">
-            By clicking continue, you agree to our{" "}
-            <a
-              href="/terms"
-              className="underline underline-offset-4 hover:text-primary"
-            >
+          <p>
+            By signing up, you agree to our{" "}
+            <a href="/terms" className="underline">
               Terms of Service
             </a>{" "}
             and{" "}
-            <a
-              href="/privacy"
-              className="underline underline-offset-4 hover:text-primary"
-            >
+            <a href="/privacy" className="underline">
               Privacy Policy
             </a>
             .
