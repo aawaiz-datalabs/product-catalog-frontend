@@ -37,17 +37,10 @@ interface Product {
   rating_count: number;
 }
 
-// supabaseClient.js
-import { createClient } from "@supabase/supabase-js";
-
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
-
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+import { Supabase } from "@/lib/supabaseClient";
 
 async function getProducts(): Promise<Product[]> {
-  const { data, error } = await supabase
-    .from("products") // Change 'products' to your actual table name
+  const { data, error } = await Supabase.from("products") // Change 'products' to your actual table name
     .select("*"); // Use '*' to select all columns
 
   if (error) {
