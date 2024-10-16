@@ -99,58 +99,54 @@ export default function AdminDashboard() {
       setIsLoading(true);
       setError(null);
       try {
-        const { data: users } = await Supabase.from("profiles").select("*");
-        const { data: products } = await Supabase.from("products").select("*");
-        const { data: orders } = await Supabase.from("orders").select(
+        const fetchUsers = Supabase.from("profiles").select("*");
+        const fetchProducts = Supabase.from("products").select("*");
+        const fetchOrders = Supabase.from("orders").select(
           "*, order_items(*, products(id, title, price))",
         );
-        const { data: messages } = await Supabase.from("messages").select("*");
+        const fetchMessages = Supabase.from("messages").select("*");
 
-        // Replace 'any' with more specific types in both locations
+        const [
+          { data: users, error: usersError },
+          { data: products, error: productsError },
+          { data: orders, error: ordersError },
+          { data: messages, error: messagesError },
+        ] = await Promise.all([
+          fetchUsers,
+          fetchProducts,
+          fetchOrders,
+          fetchMessages,
+        ]);
+
+        if (usersError) throw new Error(`Users error: ${usersError.message}`);
+        if (productsError)
+          throw new Error(`Products error: ${productsError.message}`);
+        if (ordersError)
+          throw new Error(`Orders error: ${ordersError.message}`);
+        if (messagesError)
+          throw new Error(`Messages error: ${messagesError.message}`);
+
         setData({
           users: users || [],
           products: products || [],
           orders: orders
-            ? orders.map(
-                (order: {
-                  id: string;
-                  total_amount: number;
-                  created_at: string;
-                  user_email: string;
-                  status: string;
-                  order_items: {
-                    product: {
-                      id: string;
-                      title: string;
-                      price: number;
-                    };
-                    quantity: number;
-                  }[];
-                }) => ({
-                  ...order,
-                  items: order.order_items.map(
-                    (item: {
-                      product: {
-                        id: string;
-                        title: string;
-                        price: number;
-                      };
-                      quantity: number;
-                    }) => ({
-                      id: item.product.id,
-                      title: item.product.title,
-                      price: item.product.price,
-                      quantity: item.quantity,
-                    }),
-                  ),
-                }),
-              )
+            ? orders.map((order) => ({
+                ...order,
+                items: order.order_items.map((item: OrderItem) => ({
+                  id: item.id,
+                  title: item.title,
+                  price: item.price,
+                  quantity: item.quantity,
+                })),
+              }))
             : [],
           messages: messages || [],
         });
       } catch (err) {
         console.error("Error fetching data:", err);
-        setError("Failed to load dashboard data");
+        setError(
+          err instanceof Error ? err.message : "Failed to load dashboard data",
+        );
       } finally {
         setIsLoading(false);
       }
@@ -159,24 +155,29 @@ export default function AdminDashboard() {
     fetchData();
   }, []);
 
-  if (isLoading)
+  if (isLoading) {
     return (
       <div className="flex h-screen items-center justify-center">
-        Loading...
+        <div className="text-2xl font-bold">Loading dashboard data...</div>
       </div>
     );
-  if (error)
-    return (
-      <div className="flex h-screen items-center justify-center text-red-500">
-        {error}
-      </div>
-    );
-  if (!data)
+  }
+
+  if (error) {
     return (
       <div className="flex h-screen items-center justify-center">
-        No data available
+        <div className="text-2xl font-bold text-red-500">Error: {error}</div>
       </div>
     );
+  }
+
+  if (!data) {
+    return (
+      <div className="flex h-screen items-center justify-center">
+        <div className="text-2xl font-bold">No data available</div>
+      </div>
+    );
+  }
 
   const totalRevenue = data.orders.reduce(
     (sum, order) => sum + order.total_amount,
